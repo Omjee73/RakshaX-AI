@@ -46,7 +46,7 @@ const createScan = asyncHandler(async (req, res) => {
 
     let docText = "";
     try {
-      docText = await extractTextFromDocument(req.file.path, req.file.mimetype);
+      docText = await extractTextFromDocument(req.file.path, req.file.mimetype, req.file.originalname);
     } catch (error) {
       throw new ApiError(400, "Document parsing failed. Please upload a valid TXT, PDF, DOCX, CSV, or JSON file.");
     } finally {

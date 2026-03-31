@@ -19,14 +19,21 @@ const allowedMimeTypes = new Set([
   "image/webp",
   "image/gif",
   "application/pdf",
+  "application/x-pdf",
   "text/plain",
   "text/csv",
+  "application/csv",
+  "application/vnd.ms-excel",
   "application/json",
+  "application/octet-stream",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 ]);
 
+const allowedExtensions = new Set([".png", ".jpg", ".jpeg", ".webp", ".gif", ".pdf", ".txt", ".csv", ".json", ".docx", ".md", ".tsv", ".log"]);
+
 const fileFilter = (req, file, cb) => {
-  if (allowedMimeTypes.has(file.mimetype) || file.mimetype.startsWith("image/")) {
+  const extension = path.extname(file.originalname || "").toLowerCase();
+  if (allowedMimeTypes.has(file.mimetype) || file.mimetype.startsWith("image/") || allowedExtensions.has(extension)) {
     cb(null, true);
   } else {
     cb(new ApiError(400, "Only image, PDF, TXT, CSV, JSON, and DOCX files are allowed"));

@@ -7,15 +7,42 @@ function normalizeText(value) {
   return String(value || "").replace(/\s+/g, " ").trim();
 }
 
-async function extractTextFromDocument(filePath, mimeType) {
-  const extension = path.extname(filePath).toLowerCase();
+function isTextLike(mimeType, extension) {
+  return (
+    String(mimeType || "").startsWith("text/") ||
+    [
+      ".txt",
+      ".md",
+      ".csv",
+      ".tsv",
+      ".json",
+      ".log"
+    ].includes(extension)
+  );
+}
 
-  if (mimeType === "text/plain" || [".txt", ".md", ".csv", ".json"].includes(extension)) {
-    const raw = await fs.readFile(filePath, "utf8");
+async function readTextWithFallback(filePath) {
+  try {
+    return await fs.readFile(filePath, "utf8");
+  } catch (error) {
+    const latin = await fs.readFile(filePath, "latin1");
+    return latin;
+  }
+}
+
+async function extractTextFromDocument(filePath, mimeType, originalName = "") {
+  const extension = path.extname(originalName || filePath).toLowerCase();
+
+  if (isTextLike(mimeType, extension)) {
+    const raw = await readTextWithFallback(filePath);
     return normalizeText(raw).slice(0, 10000);
   }
 
-  if (mimeType === "application/pdf" || extension === ".pdf") {
+  if (
+    mimeType === "application/pdf" ||
+    mimeType === "application/x-pdf" ||
+    extension === ".pdf"
+  ) {
     const buffer = await fs.readFile(filePath);
     const parsed = await pdfParse(buffer);
     return normalizeText(parsed.text).slice(0, 10000);
