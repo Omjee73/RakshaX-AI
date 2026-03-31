@@ -41,7 +41,7 @@ const scanSchema = new mongoose.Schema(
     recommendedAction: { type: String, required: true },
     redFlags: [{ type: String }],
     greenFlags: [{ type: String }],
-    providerUsed: { type: String, default: "heuristic-engine" },
+    providerUsed: { type: String, default: "ai-provider" },
     analysisSummary: { type: String, default: "" },
     sourceUrl: { type: String, default: "" },
     analyzedUrl: { type: String, default: "" },
