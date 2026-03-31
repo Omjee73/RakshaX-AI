@@ -1,5 +1,6 @@
 const multer = require("multer");
 const path = require("path");
+const ApiError = require("../utils/ApiError");
 
 const storage = multer.diskStorage({
   destination(req, file, cb) {
@@ -28,14 +29,14 @@ const fileFilter = (req, file, cb) => {
   if (allowedMimeTypes.has(file.mimetype) || file.mimetype.startsWith("image/")) {
     cb(null, true);
   } else {
-    cb(new Error("Only image, PDF, TXT, CSV, JSON, and DOCX files are allowed"));
+    cb(new ApiError(400, "Only image, PDF, TXT, CSV, JSON, and DOCX files are allowed"));
   }
 };
 
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 10 * 1024 * 1024 }
+  limits: { fileSize: 20 * 1024 * 1024 }
 });
 
 module.exports = upload;

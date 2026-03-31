@@ -25,9 +25,18 @@ const createScan = asyncHandler(async (req, res) => {
       throw new ApiError(400, "Image file is required for image scan");
     }
 
-    ocrText = await extractTextFromImage(req.file.path);
-    finalContent = ocrText;
-    await fs.unlink(req.file.path).catch(() => null);
+    try {
+      ocrText = await extractTextFromImage(req.file.path);
+      finalContent = ocrText;
+    } catch (error) {
+      throw new ApiError(400, "OCR failed for the uploaded image. Please use a clearer image.");
+    } finally {
+      await fs.unlink(req.file.path).catch(() => null);
+    }
+
+    if (!finalContent || finalContent.trim().length < 8) {
+      throw new ApiError(400, "OCR could not extract enough text. Upload a clearer image with readable text.");
+    }
   }
 
   if (inputType === "document") {
@@ -35,8 +44,14 @@ const createScan = asyncHandler(async (req, res) => {
       throw new ApiError(400, "Document file is required for document scan");
     }
 
-    const docText = await extractTextFromDocument(req.file.path, req.file.mimetype);
-    await fs.unlink(req.file.path).catch(() => null);
+    let docText = "";
+    try {
+      docText = await extractTextFromDocument(req.file.path, req.file.mimetype);
+    } catch (error) {
+      throw new ApiError(400, "Document parsing failed. Please upload a valid TXT, PDF, DOCX, CSV, or JSON file.");
+    } finally {
+      await fs.unlink(req.file.path).catch(() => null);
+    }
 
     if (!docText || docText.length < 10) {
       throw new ApiError(

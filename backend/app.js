@@ -16,6 +16,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const trendRoutes = require("./routes/trendRoutes");
 
 const app = express();
+app.set("trust proxy", 1);
 
 app.use(
   cors({
