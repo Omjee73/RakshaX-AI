@@ -7,7 +7,7 @@ RakshaX AI is a production-focused MERN platform for scam detection and user pro
 - JWT auth with role-based access (`user`, `admin`)
 - Scam analyzer for text, URL, image, and document inputs
 - URL intelligence (page fetch + fallback reader parsing)
-- AI provider chain: AI Pipe/OpenRouter -> OpenAI -> Ollama -> heuristic engine
+- AI provider chain: AI Pipe/OpenRouter -> OpenAI -> Ollama
 - Detailed report fields: score, confidence, verdict, category, red/green flags, summary
 - Community voting with email report notifications
 - Vote report recipient selection: login email + custom extra emails
@@ -34,7 +34,7 @@ Each scan returns:
 - `redFlags[]`
 - `greenFlags[]`
 - `recommendedAction`
-- `providerUsed` (`aipipe-openrouter`, `openai`, `ollama`, `heuristic-engine`)
+- `providerUsed` (actual provider/model used, for example `aipipe-openrouter:openai/gpt-4.1`)
 
 ## Scan Context Types
 
@@ -176,6 +176,6 @@ docker compose down
 
 ## Notes
 
-- If AI keys are missing or unavailable, heuristic engine still returns dynamic non-static analysis.
+- If AI keys are missing/unavailable and Ollama is not running, analysis request fails with clear configuration error.
 - For strongest results, set a real `AIPIPE_TOKEN` or `OPENAI_API_KEY`.
 - Vote emails include mark type, reported item, category, scores, and recommendation.

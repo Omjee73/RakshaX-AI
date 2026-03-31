@@ -101,7 +101,7 @@ const createScan = asyncHandler(async (req, res) => {
     recommendedAction: aiResult.recommendedAction,
     redFlags: aiResult.redFlags || [],
     greenFlags: aiResult.greenFlags || [],
-    providerUsed: aiResult.providerUsed || "heuristic-engine",
+    providerUsed: aiResult.providerUsed || "ai-provider",
     analysisSummary: aiResult.analysisSummary || ""
   });
 

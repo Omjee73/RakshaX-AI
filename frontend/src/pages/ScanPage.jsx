@@ -224,8 +224,8 @@ export default function ScanPage() {
               >
                 Mark Scam
               </button>
-              <button
-                onClick={() => exportNodeAsPdf(resultRef.current, `rakshaxai-report-${scan._id}.pdf`)}
+                <button
+                  onClick={() => exportNodeAsPdf(resultRef.current, `RakshaX-AI-Report-${scan._id}.pdf`)}
                 className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white dark:bg-slate-100 dark:text-slate-900"
               >
                 Export PDF

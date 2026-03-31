@@ -13,20 +13,10 @@ const ALLOWED_CATEGORIES = new Set([
   "other"
 ]);
 
-const FALLBACK_RESPONSE = {
-  scamScore: 65,
-  confidence: 60,
-  verdict: "suspicious",
-  category: "other",
-  providerUsed: "heuristic-engine",
-  explanation:
-    "Suspicious language patterns were detected. Please verify sender identity, URLs, and payment requests before taking action.",
-  analysisSummary: "Insufficient trusted context was available from upstream AI providers.",
-  redFlags: ["Unknown sender or context"],
-  greenFlags: [],
-  recommendedAction:
-    "Do not click unknown links, avoid sharing OTP/UPI PIN, report the sender, and verify via official channels."
-};
+const DEFAULT_EXPLANATION =
+  "AI model returned incomplete reasoning. Verify sender identity, payment requests, and URLs through official channels.";
+const DEFAULT_RECOMMENDED_ACTION =
+  "Do not share OTP, UPI PIN, CVV, or passwords. Independently verify claims and report suspicious communication.";
 
 const SIGNAL_RULES = [
   { pattern: /\botp\b|one[ -]?time[ -]?password/i, weight: 18, category: "phishing", signal: "OTP request" },
@@ -85,12 +75,12 @@ function normalizeAiResponse(parsed) {
     confidence,
     verdict,
     category,
-    providerUsed: String(parsed.providerUsed || "llm"),
-    explanation: String(parsed.explanation || FALLBACK_RESPONSE.explanation),
+    providerUsed: String(parsed.providerUsed || "ai-provider"),
+    explanation: String(parsed.explanation || DEFAULT_EXPLANATION),
     analysisSummary: String(parsed.analysisSummary || "Risk evaluated from message and URL indicators."),
     redFlags,
     greenFlags,
-    recommendedAction: String(parsed.recommendedAction || FALLBACK_RESPONSE.recommendedAction)
+    recommendedAction: String(parsed.recommendedAction || DEFAULT_RECOMMENDED_ACTION)
   };
 }
 
@@ -294,7 +284,10 @@ async function callAiPipeOpenRouter(prompt) {
   );
 
   const raw = response.data?.choices?.[0]?.message?.content;
-  return normalizeAiResponse(parseJsonFromModelOutput(raw));
+  return {
+    ...normalizeAiResponse(parseJsonFromModelOutput(raw)),
+    providerUsed: `aipipe-openrouter:${env.aiPipeOpenRouterModel}`
+  };
 }
 
 async function callOpenAi(prompt) {
@@ -321,7 +314,10 @@ async function callOpenAi(prompt) {
   );
 
   const raw = response.data?.choices?.[0]?.message?.content;
-  return normalizeAiResponse(parseJsonFromModelOutput(raw));
+  return {
+    ...normalizeAiResponse(parseJsonFromModelOutput(raw)),
+    providerUsed: `openai:${env.openaiModel}`
+  };
 }
 
 async function callOllama(prompt) {
@@ -340,7 +336,10 @@ async function callOllama(prompt) {
   );
 
   const raw = response.data?.response;
-  return normalizeAiResponse(parseJsonFromModelOutput(raw));
+  return {
+    ...normalizeAiResponse(parseJsonFromModelOutput(raw)),
+    providerUsed: `ollama:${env.ollamaModel}`
+  };
 }
 
 async function tryProvider(providerName, runner) {
@@ -372,21 +371,16 @@ async function analyzeScamContent({ inputType, contextType = "general", content,
         () => tryProvider("openai", () => callOpenAi(prompt))
       ];
 
-  const providers = env.aiStrategy !== "ollama-first"
-    ? ["aipipe-openrouter", "openai", "ollama"]
-    : ["ollama", "aipipe-openrouter", "openai"];
-
   for (let index = 0; index < sequence.length; index += 1) {
     const result = await sequence[index]();
     if (result) {
-      return {
-        ...result,
-        providerUsed: result.providerUsed || providers[index]
-      };
+      return result;
     }
   }
 
-  return generateHeuristicAnalysis({ inputType, contextType, content, sourceUrl, urlTitle, urlWarning });
+  throw new Error(
+    "AI analysis unavailable. Configure AIPIPE_TOKEN, OPENAI_API_KEY, or running OLLAMA server and retry."
+  );
 }
 
 module.exports = { analyzeScamContent };

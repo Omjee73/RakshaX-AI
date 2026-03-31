@@ -38,7 +38,7 @@ async function sendHighRiskAlert({ to, scan }) {
   await mailer.sendMail({
     from: env.smtpFrom || env.smtpUser,
     to,
-    subject: "RakshaX Alert: High Risk Scan Detected",
+    subject: "RakshaX AI Alert: High Risk Scan Detected",
     html
   });
 }
