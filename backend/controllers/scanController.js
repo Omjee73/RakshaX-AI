@@ -66,11 +66,12 @@ const createScan = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Submitted content is too short to analyze");
   }
 
-  const cacheKey = buildCacheKey(`v4:${inputType}:${contextType}:${analyzedUrl || sourceUrl}:${finalContent}`);
+  const cacheKey = buildCacheKey(`v5:${inputType}:${contextType}:${analyzedUrl || sourceUrl}:${finalContent}`);
   const cached = await getCachedAnalysis(cacheKey);
+  const validCachedResult = cached && cached.providerUsed !== "heuristic-engine" ? cached : null;
 
   const aiResult =
-    cached ||
+    validCachedResult ||
     (await analyzeScamContent({
       inputType,
       contextType,
