@@ -5,7 +5,7 @@ RakshaX AI is a production-focused MERN platform for scam detection and user pro
 ## Highlights
 
 - JWT auth with role-based access (`user`, `admin`)
-- Scam analyzer for text, URL, image, and document inputs
+- Scam analyzer for text, URL, and document inputs
 - URL intelligence (page fetch + fallback reader parsing)
 - AI provider chain: AI Pipe/OpenRouter -> OpenAI -> Ollama
 - Detailed report fields: score, confidence, verdict, category, red/green flags, summary
@@ -18,7 +18,6 @@ RakshaX AI is a production-focused MERN platform for scam detection and user pro
 
 - `text`: SMS/WhatsApp/email content
 - `url`: website URL + optional context text
-- `image`: screenshot OCR extraction
 - `document`: `.pdf`, `.txt`, `.docx`, `.csv`, `.json`
 
 ## Report Output
@@ -55,11 +54,9 @@ flowchart TD
   A[User Input] --> B[Frontend Scan Form]
   B --> C[POST /api/scan/analyze]
   C --> D{inputType}
-  D -->|image| E[OCR Service]
   D -->|document| F[Document Parser]
   D -->|url| G[URL Fetch + Reader Fallback]
   D -->|text| H[Raw Text]
-  E --> I[Normalized Content]
   F --> I
   G --> I
   H --> I
@@ -86,7 +83,7 @@ flowchart TD
 - Node.js + Express
 - MongoDB + Mongoose
 - Redis (optional cache)
-- Multer, Tesseract.js, pdf-parse, mammoth
+- Multer, pdf-parse, mammoth
 - Joi validation
 
 ## Environment Variables

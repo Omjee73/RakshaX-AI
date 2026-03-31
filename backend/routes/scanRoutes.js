@@ -9,7 +9,7 @@ const upload = require("../middleware/upload");
 const router = express.Router();
 
 const scanSchema = Joi.object({
-  inputType: Joi.string().valid("text", "url", "image", "document").required(),
+  inputType: Joi.string().valid("text", "url", "document").required(),
   contextType: Joi.string()
     .valid("general", "payment-request", "terms-conditions", "documents", "job-offer", "social-message", "email")
     .default("general"),

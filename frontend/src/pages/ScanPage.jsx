@@ -14,7 +14,7 @@ export default function ScanPage() {
   const [contextType, setContextType] = useState("general");
   const [content, setContent] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
-  const [image, setImage] = useState(null);
+  const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [scan, setScan] = useState(null);
   const [includeAccountEmail, setIncludeAccountEmail] = useState(true);
@@ -24,10 +24,10 @@ export default function ScanPage() {
   const debouncedContent = useDebounce(content, 500);
 
   const canSubmit = useMemo(() => {
-    if (inputType === "image" || inputType === "document") return Boolean(image);
+    if (inputType === "document") return Boolean(file);
     if (inputType === "url") return debouncedContent.length > 4 || sourceUrl.length > 4;
     return debouncedContent.length > 4;
-  }, [debouncedContent, image, inputType, sourceUrl]);
+  }, [debouncedContent, file, inputType, sourceUrl]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -37,12 +37,12 @@ export default function ScanPage() {
     try {
       let response;
 
-      if (inputType === "image" || inputType === "document") {
+      if (inputType === "document") {
         const formData = new FormData();
         formData.append("inputType", inputType);
         formData.append("contextType", contextType);
-        formData.append("content", "ocr");
-        formData.append("file", image);
+        formData.append("content", "document");
+        formData.append("file", file);
 
         response = await api.post("/scan/analyze", formData, {
           headers: { "Content-Type": "multipart/form-data" }
@@ -93,7 +93,7 @@ export default function ScanPage() {
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-700 dark:bg-slate-900">
         <h1 className="text-2xl font-extrabold">Scam Analyzer</h1>
         <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-          Submit suspicious text, links, or screenshots and get risk analysis.
+          Submit suspicious text, links, or documents and get risk analysis.
         </p>
         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
           Note: AI scan needs valid AIPIPE token configured in backend.
@@ -109,7 +109,6 @@ export default function ScanPage() {
           >
             <option value="text">Text Message</option>
             <option value="url">URL / Website</option>
-            <option value="image">Image Screenshot</option>
             <option value="document">Document Upload</option>
           </select>
           </div>
@@ -150,14 +149,12 @@ export default function ScanPage() {
             </div>
           ) : (
             <div>
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                {inputType === "image" ? "Upload Screenshot" : "Upload Document"}
-              </p>
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Upload Document</p>
             <input
               type="file"
-              accept={inputType === "image" ? "image/*" : ".pdf,.txt,.docx,.csv,.json"}
+              accept=".pdf,.txt,.docx,.csv,.json,.md,.tsv,.log"
               className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-brand-700 dark:border-slate-700 dark:bg-slate-950"
-              onChange={(event) => setImage(event.target.files?.[0] || null)}
+              onChange={(event) => setFile(event.target.files?.[0] || null)}
             />
             </div>
           )}
@@ -182,7 +179,7 @@ export default function ScanPage() {
 
         {loading && (
           <div className="mt-4">
-            <Loader text="Scanning with AI and OCR" />
+            <Loader text="Scanning with AI" />
           </div>
         )}
       </div>

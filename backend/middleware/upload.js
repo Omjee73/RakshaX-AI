@@ -13,11 +13,6 @@ const storage = multer.diskStorage({
 });
 
 const allowedMimeTypes = new Set([
-  "image/png",
-  "image/jpeg",
-  "image/jpg",
-  "image/webp",
-  "image/gif",
   "application/pdf",
   "application/x-pdf",
   "text/plain",
@@ -29,14 +24,14 @@ const allowedMimeTypes = new Set([
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 ]);
 
-const allowedExtensions = new Set([".png", ".jpg", ".jpeg", ".webp", ".gif", ".pdf", ".txt", ".csv", ".json", ".docx", ".md", ".tsv", ".log"]);
+const allowedExtensions = new Set([".pdf", ".txt", ".csv", ".json", ".docx", ".md", ".tsv", ".log"]);
 
 const fileFilter = (req, file, cb) => {
   const extension = path.extname(file.originalname || "").toLowerCase();
-  if (allowedMimeTypes.has(file.mimetype) || file.mimetype.startsWith("image/") || allowedExtensions.has(extension)) {
+  if (allowedMimeTypes.has(file.mimetype) || allowedExtensions.has(extension)) {
     cb(null, true);
   } else {
-    cb(new ApiError(400, "Only image, PDF, TXT, CSV, JSON, and DOCX files are allowed"));
+    cb(new ApiError(400, "Only document files (PDF, TXT, CSV, JSON, DOCX, MD, TSV, LOG) are allowed"));
   }
 };
 

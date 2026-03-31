@@ -4,7 +4,6 @@ const Scan = require("../models/Scan");
 const Report = require("../models/Report");
 const asyncHandler = require("../utils/asyncHandler");
 const ApiError = require("../utils/ApiError");
-const { extractTextFromImage } = require("../services/ocrService");
 const { extractTextFromDocument } = require("../services/documentService");
 const { analyzeScamContent } = require("../services/aiService");
 const { buildCacheKey, getCachedAnalysis, setCachedAnalysis } = require("../services/cacheService");
@@ -15,29 +14,9 @@ const createScan = asyncHandler(async (req, res) => {
   const { inputType, contextType = "general", content = "", sourceUrl = "" } = req.body;
 
   let finalContent = content;
-  let ocrText = "";
   let analyzedUrl = "";
   let analyzedUrlTitle = "";
   let analyzedUrlWarning = "";
-
-  if (inputType === "image") {
-    if (!req.file) {
-      throw new ApiError(400, "Image file is required for image scan");
-    }
-
-    try {
-      ocrText = await extractTextFromImage(req.file.path);
-      finalContent = ocrText;
-    } catch (error) {
-      throw new ApiError(400, "OCR failed for the uploaded image. Please use a clearer image.");
-    } finally {
-      await fs.unlink(req.file.path).catch(() => null);
-    }
-
-    if (!finalContent || finalContent.trim().length < 8) {
-      throw new ApiError(400, "OCR could not extract enough text. Upload a clearer image with readable text.");
-    }
-  }
 
   if (inputType === "document") {
     if (!req.file) {
@@ -108,7 +87,6 @@ const createScan = asyncHandler(async (req, res) => {
     analyzedUrl,
     analyzedUrlTitle,
     analyzedUrlWarning,
-    ocrText,
     scamScore: aiResult.scamScore,
     confidence: aiResult.confidence,
     verdict: aiResult.verdict,

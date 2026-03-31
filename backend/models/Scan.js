@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const scanSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
-    inputType: { type: String, enum: ["text", "url", "image", "document"], required: true, index: true },
+    inputType: { type: String, enum: ["text", "url", "document"], required: true, index: true },
     contextType: {
       type: String,
       enum: [
