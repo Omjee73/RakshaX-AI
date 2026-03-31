@@ -7,6 +7,12 @@ function normalizeText(value) {
   return String(value || "").replace(/\s+/g, " ").trim();
 }
 
+function extractPrintableTextFromBinary(buffer) {
+  const raw = buffer.toString("latin1");
+  const chunks = raw.match(/[\x20-\x7E]{4,}/g) || [];
+  return normalizeText(chunks.join(" "));
+}
+
 function isTextLike(mimeType, extension) {
   return (
     String(mimeType || "").startsWith("text/") ||
@@ -44,8 +50,22 @@ async function extractTextFromDocument(filePath, mimeType, originalName = "") {
     extension === ".pdf"
   ) {
     const buffer = await fs.readFile(filePath);
-    const parsed = await pdfParse(buffer);
-    return normalizeText(parsed.text).slice(0, 10000);
+    try {
+      const parsed = await pdfParse(buffer);
+      const pdfText = normalizeText(parsed.text);
+      if (pdfText.length >= 10) {
+        return pdfText.slice(0, 10000);
+      }
+    } catch (error) {
+      // Fall through to binary text extraction.
+    }
+
+    const fallbackText = extractPrintableTextFromBinary(buffer);
+    if (fallbackText.length >= 10) {
+      return fallbackText.slice(0, 10000);
+    }
+
+    return "";
   }
 
   if (
@@ -53,11 +73,22 @@ async function extractTextFromDocument(filePath, mimeType, originalName = "") {
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
     extension === ".docx"
   ) {
-    const result = await mammoth.extractRawText({ path: filePath });
-    return normalizeText(result.value).slice(0, 10000);
+    try {
+      const result = await mammoth.extractRawText({ path: filePath });
+      const docxText = normalizeText(result.value);
+      if (docxText.length >= 10) {
+        return docxText.slice(0, 10000);
+      }
+    } catch (error) {
+      // Fall back to generic text read for mis-labeled files.
+    }
+
+    const fallbackRaw = await readTextWithFallback(filePath);
+    return normalizeText(fallbackRaw).slice(0, 10000);
   }
 
-  return "";
+  const fallbackRaw = await readTextWithFallback(filePath);
+  return normalizeText(fallbackRaw).slice(0, 10000);
 }
 
 module.exports = { extractTextFromDocument };

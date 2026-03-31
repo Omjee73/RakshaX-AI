@@ -35,7 +35,7 @@ const createScan = asyncHandler(async (req, res) => {
     if (!docText || docText.length < 10) {
       throw new ApiError(
         400,
-        "Could not extract enough text from the uploaded document. Please try TXT, PDF, or DOCX with readable text."
+        "Could not extract enough text from the uploaded document. If this is a scanned/image-only PDF, convert it to text PDF or upload TXT/CSV/JSON/DOCX with readable text."
       );
     }
 
