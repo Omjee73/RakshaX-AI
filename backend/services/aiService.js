@@ -189,9 +189,11 @@ async function analyzeScamContent({ inputType, contextType = "general", content,
     }
   }
 
-  throw new Error(
-    "AI analysis unavailable. Configure AIPIPE_TOKEN, OPENAI_API_KEY, or running OLLAMA server and retry."
+  const error = new Error(
+    "AI analysis unavailable. Set AIPIPE_TOKEN (or AIPIPE_API_KEY) in backend/.env and restart backend container."
   );
+  error.statusCode = 503;
+  throw error;
 }
 
 module.exports = { analyzeScamContent };

@@ -95,6 +95,9 @@ export default function ScanPage() {
         <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
           Submit suspicious text, links, or screenshots and get risk analysis.
         </p>
+        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+          Note: AI scan needs valid AIPIPE token configured in backend.
+        </p>
 
         <form className="mt-5 space-y-4" onSubmit={handleSubmit}>
           <div>

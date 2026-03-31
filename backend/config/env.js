@@ -9,7 +9,11 @@ module.exports = {
   jwtSecret: process.env.JWT_SECRET || "change_this_in_production",
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "7d",
   aiStrategy: process.env.AI_STRATEGY || "api-first",
-  aiPipeToken: process.env.AIPIPE_TOKEN || "",
+  aiPipeToken:
+    process.env.AIPIPE_TOKEN ||
+    process.env.AIPIPE_API_KEY ||
+    process.env.AIPIPE_ACCESS_TOKEN ||
+    "",
   aiPipeOpenRouterModel: process.env.AIPIPE_OPENROUTER_MODEL || "openai/gpt-4.1",
   aiPipeBaseUrl: process.env.AIPIPE_BASE_URL || "https://aipipe.org",
   openaiApiKey: process.env.OPENAI_API_KEY || "",
